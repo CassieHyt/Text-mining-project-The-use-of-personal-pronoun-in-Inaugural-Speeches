@@ -1,0 +1,419 @@
+---
+#title: "Project 1"
+output:
+  html_notebook: default
+  html_document: default
+  pdf_document: default
+---
+<div id="header">
+<h1 class="title"><b><font face="Times New Roman">The use of personal pronoun in Inaugural Speeches</font></b></h1>
+<h4 class="author"><em><font face="Times New Roman">Yitong Hu</font></em></h4>
+<h4 class="date"><em><font face="Times New Roman">February 3rd. 2017</font></em></h4>
+</div>
+<div style="text-align:center">![image](../figs/personalpro.jpeg)</div>
+
+
+<h3><font face="Times New Roman">Part 1 - Packages preparaion</font></h3>
+
+```{r,message=F,warning=F}
+packages.used=c("RColorBrewer","qdap","ggplot2","reshape2","syuzhet","tm","qdap","reshape2","gridExtra","ggplot2","wordcloud","dplyr","tidytext")
+
+# check packages that need to be installed.
+packages.needed=setdiff(packages.used, 
+                        intersect(installed.packages()[,1], 
+                                  packages.used))
+# install additional packages
+if(length(packages.needed)>0){
+  install.packages(packages.needed, dependencies = TRUE)
+}
+require(devtools,quietly = T)
+install_github('recharts', 'taiyun')
+
+# library packages
+library("RColorBrewer",quietly = T)
+library("qdap",quietly = T)
+library("ggplot2",quietly = T)
+library("reshape2",quietly = T)
+library("syuzhet",quietly = T)
+library("tm",quietly = T)
+library("qdap",quietly = T)
+library("reshape2",quietly = T)
+library("gridExtra",quietly = T)
+library("ggplot2",quietly = T)
+library("wordcloud",quietly = T)
+library("dplyr",quietly = T)
+library("tidytext",quietly = T)
+library("recharts",quietly = T)
+
+#part of codes are in this R file.
+source("../lib/customized_function.R")
+```
+
+
+<h3><font face="Times New Roman">Part 2 - Data cleaning</font></h3>
+
+```{r,warning=F}
+inaug.list=read.csv("../data/InaugurationInfo.csv", stringsAsFactors = FALSE)
+inaug.data=read.table("../data/InauguationDates.txt", stringsAsFactors = FALSE,blank.lines.skip=F,sep= "\t")
+mat1<-NULL
+
+for(i in seq(nrow(inaug.list))) {
+filename <- paste0("../data/InauguralSpeeches/inaug", 
+                     inaug.list$File[i], "-", 
+                     inaug.list$Term[i], ".txt")
+tx <- readLines(filename,warn=F)
+if (i==58) 
+{
+  tx<-paste(tx, collapse = " ")
+  tx_words <- strsplit(tx, split = " ")[[1]]
+}
+else
+tx_words <- strsplit(tx, split = " ")[[1]]
+date_pattern2 <- "[a-zA-z]+"
+tx_words2 <- grep(tx_words, pattern = date_pattern2, value=T)
+tx_log <- grepl(tx_words2, pattern = date_pattern2)
+matches <- gregexpr(pattern = date_pattern2, text = tx_words2[tx_log])
+tx_words <- unlist(regmatches(tx_words2[tx_log], matches))
+tx_words <- unlist(rm_stopwords(tx_words))
+mat<-NULL
+table<-table(tx_words)
+word<-names(table)
+n<-unname(table)
+matname<-paste(inaug.list$File[i],inaug.list$Term[i])
+mat<-cbind(rep(matname,nrow(n)),word,n)
+mat1<-rbind(mat1,mat)
+}
+colnames(mat1)<-c("name","word","n") 
+matsort<-mat1[order(as.numeric(mat1[,3]),decreasing = T),]
+head(matsort)
+```
+
+<h3><font face="Times New Roman">Part 3 - Different president uses personal pronoun for different weight</font></h3>
+
+<div style="text-align:center">![image](../figs/personaltype.jpeg)</div>
+
+```{r,warning=F}
+#personal pronoun
+
+first1<-c("I","me","mine","my")
+first2<-c("we","our","ours","us")
+second<-c("you","your","yours")
+third<-c("he","she","it","him","her","his","hers","they","them","their")
+personal<-list(first1,first2,second,third)
+
+pp_mat<-matrix(nrow = nrow(inaug.list),ncol = 4)
+for(i in seq(nrow(inaug.list))) {
+  test<-matsort[matsort[,"name"]==paste(inaug.list$File[i],inaug.list$Term[i]),"word"]
+  pp_mat[i,]<-find_personal_pronoun(test)
+}
+ppname<-NULL
+for(i in seq(nrow(inaug.list))) {
+ppname[i] <- paste(inaug.list$File[i], inaug.list$Term[i]) }
+rownames(pp_mat)<-ppname
+colnames(pp_mat)<-c("first1","first2","second","third")
+head(pp_mat)
+```
+
+```{r}
+pp_mat1<-pp_mat
+rownames(pp_mat1)<-seq(1789,2017,4)
+pp_mat2<-melt(pp_mat1)
+pp_mat3<-melt(pp_mat)
+
+new1<-mat2mat(pp_mat)
+a<-ggplot(data.frame(personal_pronoun=new1[,"type"],new1[,"name"],new1[,"prop"]), aes(x=factor(new1[,"name"], levels=unique(new1[,"name"])),y=new1[,"prop"], colour=personal_pronoun,group=personal_pronoun))+ geom_line(size=2) + theme(axis.text.x = element_blank()) + xlab("time with different presidents") + ylab("proportion") 
+
+pp_dat<-data.frame(year=pp_mat2$Var1,proportion=pp_mat2$value,personal_pronoun=pp_mat2$Var2)
+b<-ggplot(pp_dat, aes(x = year, y = proportion, fill = personal_pronoun)) +
+  geom_area() +
+  scale_fill_brewer(palette = "Blues", breaks = rev(c("third","second","first2","first1")))
+
+pp_dat<-data.frame(president=pp_mat3$Var1,proportion=pp_mat2$value,personal_pronoun=pp_mat2$Var2)
+c<-ggplot(pp_dat,aes(president,proportion,fill=personal_pronoun))+geom_bar(stat="identity",position="stack")+ggtitle("")+guides(fill=guide_legend(title=NULL))+
+  scale_fill_brewer(palette = "Blues")+ theme(axis.text.x = element_blank()) + xlab("time with different presidents")
+#grid.arrange(b,c,nrow=2)
+```
+
+<h4><font face="Times New Roman">General Trend</font></h4>
+
+<p>In general,there is ....</p>
+```{r}
+eArea(pp_mat1)
+```
+
+<h4><font face="Times New Roman">Comparing between different terms</font></h4>
+
+<p>In general,there is ....</p>
+```{r,warning=F}
+#different term 
+avg<-apply(pp_mat,2,mean)
+list<-term_sep()
+avg_term1<-apply(pp_mat[list[[1]],],2,mean)
+avg_term2<-apply(pp_mat[list[[2]],],2,mean)
+df1<-data.frame(avg,avg_term1,avg_term2)
+dat<-t(df1)
+mydat<-melt(dat)
+#mydat
+mydat<-data.frame(term = mydat$Var1,personal_pronoun = mydat$Var2,proportion=round(mydat$value,2))
+ggplot(mydat,aes(term,proportion,fill=personal_pronoun))+geom_bar(stat="identity",position="stack")+ggtitle("")+theme(axis.ticks.length=unit(0.5,'cm'))+guides(fill=guide_legend(title=NULL))+
+  scale_fill_brewer(palette = "Blues")
+eRadar(xtabs( proportion~ term+personal_pronoun, mydat))
+```
+
+<h4><font face="Times New Roman">Comparing among different terms</font></h4>
+
+<p>In general,there is ....</p>
+```{r,warning=F}
+#different party
+new_inaug.list<-cbind(inaug.list,pp_mat)
+first1<-tapply(new_inaug.list$first1,new_inaug.list$Party,mean)
+first2<-tapply(new_inaug.list$first2,new_inaug.list$Party,mean)
+second<-tapply(new_inaug.list$second,new_inaug.list$Party,mean)
+third<-tapply(new_inaug.list$third,new_inaug.list$Party,mean)
+#head(new_inaug.list)
+#aggregate(new_inaug.list,)
+dat<-rbind(unname(first1),unname(first2),unname(second),unname(third))
+colnames(dat)<-names(first1)
+rownames(dat)<-c("first1","first2","second","third")
+mydat<-melt(dat)
+mydat<-data.frame(personal_pronoun = mydat$Var1, party = mydat$Var2,proportion=round(mydat$value,2))
+ggplot(mydat,aes(party,proportion,fill=personal_pronoun))+geom_bar(stat="identity",position="stack")+ggtitle("")+theme(axis.ticks.length=unit(0.5,'cm'))+guides(fill=guide_legend(title=NULL))+
+  scale_fill_brewer(palette = "Blues")+ theme(axis.text.x = element_text(angle = 15, hjust = 0.5, vjust = 0.5))
+eRadar(xtabs( proportion~ party+personal_pronoun, mydat))
+```
+
+<h3><font face="Times New Roman">Part 4 - Analysis focusing on each kind of personal pronoun's "Crazy Fan"</font></h3>
+```{r,warning=F}
+data1<-pp_mat[order(pp_mat[,1],decreasing = T),][1:10,]
+data2<-pp_mat[order(pp_mat[,2],decreasing = T),][1:10,]
+data3<-pp_mat[order(pp_mat[,3],decreasing = T),][1:10,]
+data4<-pp_mat[order(pp_mat[,4],decreasing = T),][1:10,]
+new1<-mat2mat(data1)
+new2<-mat2mat(data2)
+new3<-mat2mat(data3)
+new4<-mat2mat(data4)
+new1<-data.frame(type=new1[,"type"],name=new1[,"name"],proportion=as.numeric(new1[,"prop"]))
+new2<-data.frame(type=new2[,"type"],name=new2[,"name"],proportion=as.numeric(new2[,"prop"]))
+new3<-data.frame(type=new3[,"type"],name=new3[,"name"],proportion=as.numeric(new3[,"prop"]))
+new4<-data.frame(type=new4[,"type"],name=new4[,"name"],proportion=as.numeric(new4[,"prop"]))
+
+eBar(new1, ~name, ~proportion, ~type)
+eBar(new2, ~name, ~proportion, ~type)
+eBar(new3, ~name, ~proportion, ~type)
+eBar(new4, ~name, ~proportion, ~type)
+```
+
+<h4><font face="Times New Roman">Each personal pronoun's "Fan Club" feature : positive? negative? </font></h4>
+```{r,warning=F}
+data(positive.words)
+data(negative.words)
+sentiment_analy<-function(words)
+{
+      score<-NULL
+      # compare words to the dictionaries of positive & negative terms
+      positive.matches = match(words, positive.words)
+      negative.matches = match(words, negative.words)
+      # get the position of the matched term or NA
+      # we just want a TRUE/FALSE
+      positive_matches = !is.na(positive.matches)
+      negative_matches = !is.na(negative.matches)
+      score = sum(positive_matches) - sum(negative_matches) 
+      return(score)
+}
+senti_vec<-NULL
+for(i in seq(nrow(inaug.list))) {
+  test<-matsort[matsort[,"name"]==paste(inaug.list$File[i],inaug.list$Term[i]),"word"]
+  senti_vec[i]<-sentiment_analy(test)
+}
+svname<-NULL
+for(i in seq(nrow(inaug.list))) {
+svname[i] <- paste(inaug.list$File[i], inaug.list$Term[i]) }
+senti_vec
+
+#sentiment vs person
+senti_mat<-cbind(ppname,senti_vec)
+n1<-match(rownames(data1),ppname)
+n2<-match(rownames(data2),ppname)
+n3<-match(rownames(data3),ppname)
+n4<-match(rownames(data4),ppname)
+senti_mat2<-cbind(senti_mat[n1,2],rep("first1",10))
+senti_mat2<-rbind( senti_mat2 , cbind(senti_mat[n2,2],rep("first2",10)) )
+senti_mat2<-rbind( senti_mat2 , cbind(senti_mat[n3,2],rep("second",10)) )
+senti_mat2<-rbind( senti_mat2 , cbind(senti_mat[n4,2],rep("third",10)) )
+colnames(senti_mat2)<-c("sentimental_scores","personal_pron")
+dat<-data.frame(senti_mat2)
+p <- ggplot(dat, aes(personal_pron, as.numeric(sentimental_scores)))
+p + geom_boxplot()
+
+```
+
+<h4><font face="Times New Roman">Each personal pronoun's "Fan Club" feature : average of word using times? </font></h4>
+```{r,warning=F}
+#avg time vs person
+avg_mat<-matrix(nrow = nrow(inaug.list),ncol = 2)
+avg_mat[,1]<-ppname
+for(i in seq(nrow(inaug.list))) {
+  test<-matsort[matsort[,"name"]==paste(inaug.list$File[i],inaug.list$Term[i]),]
+  avg_mat[i,2]<-sum(as.numeric(test[,3]))/nrow(test)
+}
+senti_mat3<-cbind(avg_mat[n1,2],rep("first1",10))
+senti_mat3<-rbind( senti_mat3 , cbind(avg_mat[n2,2],rep("first2",10)) )
+senti_mat3<-rbind( senti_mat3 , cbind(avg_mat[n3,2],rep("second",10)) )
+senti_mat3<-rbind( senti_mat3 , cbind(avg_mat[n4,2],rep("third",10)) )
+colnames(senti_mat3)<-c("word_avg_time","personal_pron")
+dat<-data.frame(senti_mat3)
+p <- ggplot(dat, aes(personal_pron, as.numeric(word_avg_time)))
+p + geom_boxplot()
+```
+
+
+<h3><font face="Times New Roman">Part5 -What are they talkingfeeling using personal pronoun ? </font></h3>
+
+```{r,warning=F}
+inaug.list=read.csv("../data/InaugurationInfo.csv", stringsAsFactors = FALSE)
+inaug.data=read.table("../data/InauguationDates.txt", stringsAsFactors = FALSE,blank.lines.skip=F,sep= "\t")
+first1<-c("I","me","mine","my")
+first2<-c("we","our","ours","us")
+second<-c("you","your","yours")
+third<-c("he","she","it","him","her","his","hers","they","them","their")
+personal<-list(first1,first2,second,third)
+speech.list=read.csv("../data/InaugurationInfo.csv", stringsAsFactors = FALSE)
+speech.list$type=c(rep("inaug", nrow(speech.list)))
+speech.list$fulltext=NA
+sentence.list=NULL
+```
+
+Analysis case 1: first1 & second crazy fan
+```{r,warning=F}
+senten_mat2<-melt(senten_mat(2))
+sen_dat<-data.frame(sentence.number=senten_mat2$Var1,times=senten_mat2$value,personal_pronoun=senten_mat2$Var2,2)
+senti_mat<-round(count_emo(2)[,c(1,2,4,5,7,8)],2)
+rownames(senti_mat)<-seq(1,nrow(senti_mat))
+senti_mat2<-melt(senti_mat)
+senti_dat<-data.frame(sentence_number=senti_mat2$Var1,score=senti_mat2$value,sentiment=senti_mat2$Var2)
+
+#par(mfrow=c(1,2))
+a1<-ggplot(sen_dat,aes(sentence.number,times,fill=personal_pronoun))+geom_bar(stat="identity",position="stack")+ggtitle("")+guides(fill=guide_legend(title=NULL))+ scale_fill_brewer(palette = "Blues")+ xlab("")
+#b1<-ggplot(senti_dat, aes(x = sentence_number, y = score, fill = sentiment)) +
+#  geom_area() 
+# + scale_fill_brewer(palette = "RdBu", breaks = rev(c(factor(sentiment))))
+#b1<-ggplot(senti_dat,aes(x = sentence_number, y = score, fill = sentiment))+geom_bar(stat="identity",position="stack")+ggtitle("")+guides(fill=guide_legend(title=NULL))
+#grid.arrange(a1,b1,nrow=2)
+a1
+eArea(senti_mat)
+#find topics
+test<-topic_wc(2,1)[1:60,]
+dat<-data.frame(word=test[,"word"],freq=test[,"n"])
+eWordcloud(dat, namevar = ~word, datavar = ~freq)
+```
+
+```{r}
+senten_mat2<-melt(senten_mat(28))
+sen_dat<-data.frame(sentence.number=senten_mat2$Var1,times=senten_mat2$value,personal_pronoun=senten_mat2$Var2,2)
+senti_mat<-round(count_emo(28)[,c(1,2,4,5,7,8)],2)
+rownames(senti_mat)<-seq(1,nrow(senti_mat))
+senti_mat2<-melt(senti_mat)
+senti_dat<-data.frame(sentence_number=senti_mat2$Var1,score=senti_mat2$value,sentiment=senti_mat2$Var2)
+
+#par(mfrow=c(1,2))
+a1<-ggplot(sen_dat,aes(sentence.number,times,fill=personal_pronoun))+geom_bar(stat="identity",position="stack")+ggtitle("")+guides(fill=guide_legend(title=NULL))+ scale_fill_brewer(palette = "Blues")+ xlab("")
+#b1<-ggplot(senti_dat, aes(x = sentence_number, y = score, fill = sentiment)) +
+#  geom_area() 
+# + scale_fill_brewer(palette = "RdBu", breaks = rev(c(factor(sentiment))))
+#b1<-ggplot(senti_dat,aes(x = sentence_number, y = score, fill = sentiment))+geom_bar(stat="identity",position="stack")+ggtitle("")+guides(fill=guide_legend(title=NULL))
+#grid.arrange(a1,b1,nrow=2)
+a1
+eArea(senti_mat)
+
+find_sen(28,134)
+find_sen(28,135)
+find_sen(28,136)
+find_sen(28,137)
+apply(senti_mat,2,mean)
+test<-topic_wc(28,1)[1:60,]
+dat<-data.frame(word=test[,"word"],freq=test[,"n"])
+eWordcloud(dat, namevar = ~word, datavar = ~freq) 
+```
+
+
+
+
+Analysis case 2: first2 crazy fan
+```{r,warning=F}
+senten_mat2<-melt(senten_mat(39))
+sen_dat<-data.frame(sentence.number=senten_mat2$Var1,times=senten_mat2$value,personal_pronoun=senten_mat2$Var2)
+
+par(mfrow=c(4,1), mar=c(1,0,2,0), bty="n", xaxt="n", yaxt="n", font.main=1)
+a2<-ggplot(sen_dat,aes(sentence.number,times,fill=personal_pronoun))+geom_bar(stat="identity",position="stack")+ggtitle("")+guides(fill=guide_legend(title=NULL))+
+  scale_fill_brewer(palette = "Blues")+ xlab("")
+
+senti_mat3<-round(count_emo(39)[,c(1,2,4,5,7,8)],2)
+rownames(senti_mat3)<-seq(1,nrow(senti_mat3))
+senti_mat4<-melt(senti_mat3)
+senti_dat2<-data.frame(sentence_number=senti_mat4$Var1,score=senti_mat4$value,sentiment=senti_mat4$Var2)
+#b2<-ggplot(senti_dat2, aes(x = sentence_number, y = score, fill = sentiment)) +
+#  geom_area() 
+#b2<-ggplot(senti_dat2,aes(x = sentence_number, y = score, fill = sentiment))+geom_bar(stat="identity",position="stack")+ggtitle("")+guides(fill=guide_legend(title=NULL))
+a2
+eArea(senti_mat3)
+test<-topic_wc(39,2)[1:60,]
+dat<-data.frame(word=test[,"word"],freq=test[,"n"])
+eWordcloud(dat, namevar = ~word, datavar = ~freq)
+```
+
+```{r}
+senten_mat2<-melt(senten_mat(35))
+sen_dat<-data.frame(sentence.number=senten_mat2$Var1,times=senten_mat2$value,personal_pronoun=senten_mat2$Var2,2)
+senti_mat<-round(count_emo(35)[,c(1,2,4,5,7,8)],2)
+rownames(senti_mat)<-seq(1,nrow(senti_mat))
+senti_mat2<-melt(senti_mat)
+senti_dat<-data.frame(sentence_number=senti_mat2$Var1,score=senti_mat2$value,sentiment=senti_mat2$Var2)
+
+#par(mfrow=c(1,2))
+a1<-ggplot(sen_dat,aes(sentence.number,times,fill=personal_pronoun))+geom_bar(stat="identity",position="stack")+ggtitle("")+guides(fill=guide_legend(title=NULL))+ scale_fill_brewer(palette = "Blues")+ xlab("")
+#b1<-ggplot(senti_dat, aes(x = sentence_number, y = score, fill = sentiment)) +
+#  geom_area() 
+# + scale_fill_brewer(palette = "RdBu", breaks = rev(c(factor(sentiment))))
+#b1<-ggplot(senti_dat,aes(x = sentence_number, y = score, fill = sentiment))+geom_bar(stat="identity",position="stack")+ggtitle("")+guides(fill=guide_legend(title=NULL))
+#grid.arrange(a1,b1,nrow=2)
+a1
+eArea(senti_mat)
+#find_sen(28,134)
+#find_sen(28,135)
+#find_sen(28,136)
+#find_sen(28,137)
+apply(senti_mat,2,mean)
+test<-topic_wc(35,2)[1:60,]
+dat<-data.frame(word=test[,"word"],freq=test[,"n"])
+eWordcloud(dat, namevar = ~word, datavar = ~freq)
+```
+
+
+
+
+Analysis case 3: third crazy fan
+
+```{r}
+senten_mat2<-melt(senten_mat(57))
+sen_dat<-data.frame(sentence.number=senten_mat2$Var1,times=senten_mat2$value,personal_pronoun=senten_mat2$Var2)
+a3<-ggplot(sen_dat,aes(sentence.number,times,fill=personal_pronoun))+geom_bar(stat="identity",position="stack")+ggtitle("")+guides(fill=guide_legend(title=NULL))+ scale_fill_brewer(palette = "Blues")+ xlab("")
+senti_mat5<-round(count_emo(57)[,c(1,2,4,5,7,8)],2)
+rownames(senti_mat5)<-seq(1,nrow(senti_mat5))
+senti_mat6<-melt(senti_mat5)
+senti_dat3<-data.frame(sentence_number=senti_mat6$Var1,score=senti_mat6$value,sentiment=senti_mat6$Var2)
+b3<-ggplot(senti_dat3,aes(x = sentence_number, y = score, fill = sentiment))+geom_bar(stat="identity",position="stack")+ggtitle("")+guides(fill=guide_legend(title=NULL))
+#b3<-ggplot(senti_dat3, aes(x = sentence_number, y = score, fill = sentiment)) +
+#  geom_area() 
+a3
+eArea(senti_mat5)
+apply(senti_mat5,2,mean,na.rm=T)
+test<-topic_wc(57,2)[1:60,]
+dat<-data.frame(word=test[,"word"],freq=test[,"n"])
+eWordcloud(dat, namevar = ~word, datavar = ~freq)
+```
+
+
+
+
+
+
