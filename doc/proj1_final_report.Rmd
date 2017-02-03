@@ -95,6 +95,7 @@ head(matsort)
 <h3><font face="Times New Roman">Part 3 - Different president uses personal pronoun for different weight</font></h3>
 
 <p>We divide personal pronouns into 4 types,first person singular form,first person plural form,second person form and third person form.</p>
+<p>By saying weight,we mean the times one using a certain personal pronoun divided by the total times he using all four types of pronouns.</p>
 
 <div style="text-align:center">![image](../figs/personaltype.jpeg)</div>
 
@@ -143,6 +144,9 @@ c<-ggplot(pp_dat,aes(president,proportion,fill=personal_pronoun))+geom_bar(stat=
 <p>Notice:The plot(and some following plots) are interactive by moving your mouse to a certain data point,details can be shown.</p>
 
 <h4>3.1 General Trend</h4>
+
+x-axis:time (different presidents)
+y-axis:the weight of a certain kind of personal pronoun being used.
 
 ```{r}
 eArea(pp_mat1)
@@ -230,6 +234,9 @@ sentence.list=NULL
 
 <h4>4.1 Top ten using first person singular form</h4>
 
++ x-axis:different presidents
++ y-axis:the weight of a certain kind of personal pronoun being used.
+
 ```{r}
 eBar(new1, ~name, ~proportion, ~type)
 ```
@@ -259,6 +266,9 @@ eWordcloud(dat, namevar = ~word, datavar = ~freq,size = c(600, 600),title = "Wil
 <p>Except Washington,from No.2 William McKinley(term 1) to No.4 James Buchanan(term 1),they didn't even use second person.Add their three's speeches to make the wordcloud,we can hardly find the words demonstrating centralization of power, instead,there are words like "congress","fair","civil","life",showing more gentle emotion.</p>
 <h4>4.2 Top ten using first person plural form</h4>
 
++ x-axis:different presidents
++ y-axis:the weight of a certain kind of personal pronoun being used.
+
 ```{r}
 eBar(new2, ~name, ~proportion, ~type)
 ```
@@ -282,10 +292,18 @@ eWordcloud(dat, namevar = ~word, datavar = ~freq,size = c(600, 600),title = "TOP
 <p>For presidents frequently using first person plural form, there exists similar phenomenon.From No.1 Franklin DRoosevelt(term 3) to No.6 Franklin DRoosevelt(term 4),they also make the speeches without using second person.Add their speeches to make the wordcloud,we find similar words showing gentle emotion.</p>
 
 <h4>4.3 Top ten using second person</h4>
+
++ x-axis:different presidents
++ y-axis:the weight of a certain kind of personal pronoun being used.
+
 ```{r}
 eBar(new3, ~name, ~proportion, ~type)
 ```
 <h4>4.4 Top ten using third person</h4>
+
++ x-axis:different presidents
++ y-axis:the weight of a certain kind of personal pronoun being used.
+
 ```{r}
 eBar(new4, ~name, ~proportion, ~type)
 ```
@@ -316,7 +334,6 @@ for(i in seq(nrow(inaug.list))) {
 svname<-NULL
 for(i in seq(nrow(inaug.list))) {
 svname[i] <- paste(inaug.list$File[i], inaug.list$Term[i]) }
-senti_vec
 
 #sentiment vs person
 senti_mat<-cbind(ppname,senti_vec)
@@ -363,6 +380,8 @@ p + geom_boxplot()
 <h4><font face="Times New Roman">Finding 1:first singular form always come with trust and anticipation. </font></h4>
 
 + George Washington: There are 4 sentences in his speeches,with 1,2 and 4 using high frequency of first person singular pronoun,and the emotions of these sentences are mainly trust.
+
+
 ```{r,warning=F}
 senten_mat2<-melt(senten_mat(2))
 sen_dat<-data.frame(sentence.number=senten_mat2$Var1,times=senten_mat2$value,personal_pronoun=senten_mat2$Var2,2)
@@ -379,6 +398,10 @@ a1<-ggplot(sen_dat,aes(sentence.number,times,fill=personal_pronoun))+geom_bar(st
 #b1<-ggplot(senti_dat,aes(x = sentence_number, y = score, fill = sentiment))+geom_bar(stat="identity",position="stack")+ggtitle("")+guides(fill=guide_legend(title=NULL))
 #grid.arrange(a1,b1,nrow=2)
 a1
+```
+
+
+```{r}
 eArea(senti_mat)
 #find topics
 #test<-topic_wc(2,1)
@@ -386,8 +409,15 @@ eArea(senti_mat)
 #dat<-data.frame(word=test[,"word"],freq=test[,"n"])
 #eWordcloud(dat, namevar = ~word, datavar = ~freq,size = c(600, 600),title = "George Washington & fist person singular",rotationRange = c(-1, 1))
 ```
+[for the area plot]
+
+x-axis:sentence number
+
+y-axis:the weight of a certain kind of emotion being detected.
 
 + William McKinley: The sentences using first person singular pronoun frequently also contains trust emotion.
+
+
 ```{r}
 senten_mat2<-melt(senten_mat(28))
 sen_dat<-data.frame(sentence.number=senten_mat2$Var1,times=senten_mat2$value,personal_pronoun=senten_mat2$Var2,2)
@@ -418,6 +448,7 @@ eArea(senti_mat)
 <h4><font face="Times New Roman">Finding 2 :first plural form always convey positive emotions.</font></h4>
 
 + Richard Nixon
+
 ```{r,warning=F}
 senten_mat2<-melt(senten_mat(45))
 sen_dat<-data.frame(sentence.number=senten_mat2$Var1,times=senten_mat2$value,personal_pronoun=senten_mat2$Var2)
@@ -434,12 +465,22 @@ senti_dat2<-data.frame(sentence_number=senti_mat4$Var1,score=senti_mat4$value,se
 #  geom_area() 
 #b2<-ggplot(senti_dat2,aes(x = sentence_number, y = score, fill = sentiment))+geom_bar(stat="identity",position="stack")+ggtitle("")+guides(fill=guide_legend(title=NULL))
 a2
+
+```
+
+```{r}
 apply(senti_mat3,2,mean)
 eArea(senti_mat3)
 #test<-topic_wc(45,2)[1:60,]
 #dat<-data.frame(word=test[,"word"],freq=test[,"n"])
 #eWordcloud(dat, namevar = ~word, datavar = ~freq)
 ```
+
+[for the area plot]
+
+x-axis:sentence number
+
+y-axis:the weight of a certain kind of emotion being detected.
 
 + Barack Obama
 
@@ -473,6 +514,8 @@ apply(senti_mat,2,mean)
 <h4><font face="Times New Roman">Finding 3 : Anger often begin with third person form.</font></h4>
 
 + Ulysses S.Grant
+
+
 ```{r}
 senten_mat2<-melt(senten_mat(21))
 sen_dat<-data.frame(sentence.number=senten_mat2$Var1,times=senten_mat2$value,personal_pronoun=senten_mat2$Var2)
@@ -485,12 +528,22 @@ b3<-ggplot(senti_dat3,aes(x = sentence_number, y = score, fill = sentiment))+geo
 #b3<-ggplot(senti_dat3, aes(x = sentence_number, y = score, fill = sentiment)) +
 #  geom_area() 
 a3
+```
+
+
+```{r}
 eArea(senti_mat5)
 apply(senti_mat5,2,mean,na.rm=T)
 #test<-topic_wc(57,2)[1:60,]
 #dat<-data.frame(word=test[,"word"],freq=test[,"n"])
 #eWordcloud(dat, namevar = ~word, datavar = ~freq)
 ```
+[for the area plot]
+
+x-axis:sentence number
+
+y-axis:the weight of a certain kind of emotion being detected.
+
 
 + Dwight D.Eisenhower
 ```{r}
@@ -511,6 +564,7 @@ apply(senti_mat5,2,mean,na.rm=T)
 #dat<-data.frame(word=test[,"word"],freq=test[,"n"])
 #eWordcloud(dat, namevar = ~word, datavar = ~freq)
 ```
+
 
 <h3><font face="Times New Roman">Part 6 - Next step</font></h3>
 
