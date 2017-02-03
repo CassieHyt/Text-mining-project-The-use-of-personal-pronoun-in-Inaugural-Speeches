@@ -243,7 +243,7 @@ test<-topic_wc(2,3)
 dat<-data.frame(word=test[,"word"],freq=5*as.numeric(test[,"n"]))
 eWordcloud(dat[2:32,], namevar = ~word, datavar = ~freq,size = c(600, 600),title = "George Washington & second person",rotationRange = c(-1, 1))
 ```
-<p>No.1 "first person singular user" is George Washington(term 2).The 67% personal pronoun George Washington used in his second person is first person singular form. He also used second person quite frequently at about 33%.Therefore,we can speculate in his speeches,he set he and the listeners apart,taking himself as a leader talking something like "administration","chief", while using second term to express his anticipation to public.</p>
+<p>No.1 "first person singular user" is George Washington(term 2).The 67% personal pronoun George Washington used in his second person is first person singular form. He also used second person quite frequently at about 33%. Along with the word cloud,we can speculate in his speeches,no matter using first singular form or second form,he used words like "administration","chief",it was shown that he took himself as a leader and wanted to express his power to public.</p>
 
 ```{r}
 test<-matsort[matsort[,"name"] == "WilliamMcKinley 1",]
@@ -358,9 +358,13 @@ p + geom_boxplot()
 
 <h3><font face="Times New Roman">Part 5 - What are they talking/feeling using personal pronoun ? </font></h3>
 
+<p>In this part,we mainly make two plots to compare.One of them is stacked bar plot,demonstrating the four proportions of four personal pronouns for each sentence in one speech.The second is an area plot,showing different emotions for each sentence in one speech.</p>
+
 <h4><font face="Times New Roman">Finding 1:first singular form always come with trust and anticipation. </font></h4>
 
 + George Washington
+
+<p>There are 4 sentences in his speeches,with 1,2 and 4 using high frequency of first person singular pronoun,and the emotions of these sentences are mainly trust.</p>
 ```{r,warning=F}
 senten_mat2<-melt(senten_mat(2))
 sen_dat<-data.frame(sentence.number=senten_mat2$Var1,times=senten_mat2$value,personal_pronoun=senten_mat2$Var2,2)
@@ -370,7 +374,7 @@ senti_mat2<-melt(senti_mat)
 senti_dat<-data.frame(sentence_number=senti_mat2$Var1,score=senti_mat2$value,sentiment=senti_mat2$Var2)
 
 #par(mfrow=c(1,2))
-a1<-ggplot(sen_dat,aes(sentence.number,times,fill=personal_pronoun))+geom_bar(stat="identity",position="stack")+ggtitle("")+guides(fill=guide_legend(title=NULL))+ scale_fill_brewer(palette = "Blues")+ xlab("")
+a1<-ggplot(sen_dat,aes(sentence.number,times,fill=personal_pronoun))+geom_bar(stat="identity",position="stack")+ggtitle("")+guides(fill=guide_legend(title=NULL))+ scale_fill_brewer(palette = "Blues")+ xlab("sentence number")
 #b1<-ggplot(senti_dat, aes(x = sentence_number, y = score, fill = sentiment)) +
 #  geom_area() 
 # + scale_fill_brewer(palette = "RdBu", breaks = rev(c(factor(sentiment))))
@@ -387,6 +391,7 @@ eArea(senti_mat)
 
 + William McKinley
 
+<p>The sentences using first person singular pronoun frequently also contains trust emotion. </p>
 ```{r}
 senten_mat2<-melt(senten_mat(28))
 sen_dat<-data.frame(sentence.number=senten_mat2$Var1,times=senten_mat2$value,personal_pronoun=senten_mat2$Var2,2)
@@ -396,7 +401,7 @@ senti_mat2<-melt(senti_mat)
 senti_dat<-data.frame(sentence_number=senti_mat2$Var1,score=senti_mat2$value,sentiment=senti_mat2$Var2)
 
 #par(mfrow=c(1,2))
-a1<-ggplot(sen_dat,aes(sentence.number,times,fill=personal_pronoun))+geom_bar(stat="identity",position="stack")+ggtitle("")+guides(fill=guide_legend(title=NULL))+ scale_fill_brewer(palette = "Blues")+ xlab("")
+a1<-ggplot(sen_dat,aes(sentence.number,times,fill=personal_pronoun))+geom_bar(stat="identity",position="stack")+ggtitle("")+guides(fill=guide_legend(title=NULL))+ scale_fill_brewer(palette = "Blues")+ xlab("sentence number")
 #b1<-ggplot(senti_dat, aes(x = sentence_number, y = score, fill = sentiment)) +
 #  geom_area() 
 # + scale_fill_brewer(palette = "RdBu", breaks = rev(c(factor(sentiment))))
@@ -423,7 +428,7 @@ sen_dat<-data.frame(sentence.number=senten_mat2$Var1,times=senten_mat2$value,per
 
 par(mfrow=c(4,1), mar=c(1,0,2,0), bty="n", xaxt="n", yaxt="n", font.main=1)
 a2<-ggplot(sen_dat,aes(sentence.number,times,fill=personal_pronoun))+geom_bar(stat="identity",position="stack")+ggtitle("")+guides(fill=guide_legend(title=NULL))+
-  scale_fill_brewer(palette = "Blues")+ xlab("")
+  scale_fill_brewer(palette = "Blues")+ xlab("sentence number")
 
 senti_mat3<-round(count_emo(45)[,c(1,2,4,5,7,8)],2)
 rownames(senti_mat3)<-seq(1,nrow(senti_mat3))
@@ -451,7 +456,7 @@ senti_mat2<-melt(senti_mat)
 senti_dat<-data.frame(sentence_number=senti_mat2$Var1,score=senti_mat2$value,sentiment=senti_mat2$Var2)
 
 #par(mfrow=c(1,2))
-a1<-ggplot(sen_dat,aes(sentence.number,times,fill=personal_pronoun))+geom_bar(stat="identity",position="stack")+ggtitle("")+guides(fill=guide_legend(title=NULL))+ scale_fill_brewer(palette = "Blues")+ xlab("")
+a1<-ggplot(sen_dat,aes(sentence.number,times,fill=personal_pronoun))+geom_bar(stat="identity",position="stack")+ggtitle("")+guides(fill=guide_legend(title=NULL))+ scale_fill_brewer(palette = "Blues")+ xlab("sentence number")
 #b1<-ggplot(senti_dat, aes(x = sentence_number, y = score, fill = sentiment)) +
 #  geom_area() 
 # + scale_fill_brewer(palette = "RdBu", breaks = rev(c(factor(sentiment))))
@@ -471,11 +476,11 @@ apply(senti_mat,2,mean)
 
 <h4><font face="Times New Roman">Finding 3 : Anger often begin with third person form.</font></h4>
 
-+ Ulysses SGrant
++ Ulysses S.Grant
 ```{r}
 senten_mat2<-melt(senten_mat(21))
 sen_dat<-data.frame(sentence.number=senten_mat2$Var1,times=senten_mat2$value,personal_pronoun=senten_mat2$Var2)
-a3<-ggplot(sen_dat,aes(sentence.number,times,fill=personal_pronoun))+geom_bar(stat="identity",position="stack")+ggtitle("")+guides(fill=guide_legend(title=NULL))+ scale_fill_brewer(palette = "Blues")+ xlab("")
+a3<-ggplot(sen_dat,aes(sentence.number,times,fill=personal_pronoun))+geom_bar(stat="identity",position="stack")+ggtitle("")+guides(fill=guide_legend(title=NULL))+ scale_fill_brewer(palette = "Blues")+ xlab("sentence number")
 senti_mat5<-round(count_emo(21)[,c(1,2,4,5,7,8)],2)
 rownames(senti_mat5)<-seq(1,nrow(senti_mat5))
 senti_mat6<-melt(senti_mat5)
@@ -491,11 +496,11 @@ apply(senti_mat5,2,mean,na.rm=T)
 #eWordcloud(dat, namevar = ~word, datavar = ~freq)
 ```
 
-+ Dwight DEisenhower
++ Dwight D.Eisenhower
 ```{r}
 senten_mat2<-melt(senten_mat(43))
 sen_dat<-data.frame(sentence.number=senten_mat2$Var1,times=senten_mat2$value,personal_pronoun=senten_mat2$Var2)
-a3<-ggplot(sen_dat,aes(sentence.number,times,fill=personal_pronoun))+geom_bar(stat="identity",position="stack")+ggtitle("")+guides(fill=guide_legend(title=NULL))+ scale_fill_brewer(palette = "Blues")+ xlab("")
+a3<-ggplot(sen_dat,aes(sentence.number,times,fill=personal_pronoun))+geom_bar(stat="identity",position="stack")+ggtitle("")+guides(fill=guide_legend(title=NULL))+ scale_fill_brewer(palette = "Blues")+ xlab("sentence number")
 senti_mat5<-round(count_emo(43)[,c(1,2,4,5,7,8)],2)
 rownames(senti_mat5)<-seq(1,nrow(senti_mat5))
 senti_mat6<-melt(senti_mat5)
