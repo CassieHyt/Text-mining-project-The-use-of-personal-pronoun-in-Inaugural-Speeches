@@ -94,8 +94,9 @@ head(matsort)
 
 <h3><font face="Times New Roman">Part 3 - Different president uses personal pronoun for different weight</font></h3>
 
+<p>In this part,we will do a general analysis,to see the general trend and find difference of the weight when divided by different factors.By saying weight,we mean the times one using a certain personal pronoun divided by the total times he using all four types of pronouns.</p>
 <p>We divide personal pronouns into 4 types,first person singular form,first person plural form,second person form and third person form.</p>
-<p>By saying weight,we mean the times one using a certain personal pronoun divided by the total times he using all four types of pronouns.</p>
+
 
 <div style="text-align:center">![image](../figs/personaltype.jpeg)</div>
 
@@ -205,6 +206,8 @@ eRadar(xtabs( proportion~ party+personal_pronoun, mydat))
 
 
 <h3><font face="Times New Roman">Part 4 - Analysis on each kind of personal pronoun's CRAZY FAN</font></h3>
+
+<p>In this part, we switch our analysis from the overall data to some extreme points, to analysis the features about those presidents who use a certain type of personal pronoun at a high frequency,like top 10.</p>
 ```{r,warning=F}
 data1<-pp_mat[order(pp_mat[,1],decreasing = T),][1:10,]
 data2<-pp_mat[order(pp_mat[,2],decreasing = T),][1:10,]
@@ -375,7 +378,9 @@ p + geom_boxplot()
 
 <h3><font face="Times New Roman">Part 5 - What are they talking/feeling using personal pronoun ? </font></h3>
 
-<p>In this part,we mainly make two plots to compare.One of them is stacked bar plot,demonstrating the four proportions of four personal pronouns for each sentence in one speech.The second is an area plot,showing different emotions for each sentence in one speech.</p>
+<p>In this part,we go a little deeper to each sentences.What's the weight of personal pronouns used in each sentences? In those sentences,what are they talking about and what emotion are they try to convey,these are what we care in this part.
+<p>We mainly make two plots to compare.One of them is stacked bar plot,demonstrating the four proportions of four personal pronouns for each sentence in one speech.The second is an area plot,showing different emotions for each sentence in one speech.</p>
+<p>After check the plots for each presidents one by one,I will share three findings here.</p>
 
 <h4><font face="Times New Roman">Finding 1:first singular form always come with trust and anticipation. </font></h4>
 
@@ -568,7 +573,7 @@ apply(senti_mat5,2,mean,na.rm=T)
 
 <h3><font face="Times New Roman">Part 6 - Next step</font></h3>
 
-+ <h4><font face="Times New Roman">Collect more data for other formal speeches to gain more convincing analysis.</font></h4>
-+ <h4><font face="Times New Roman">Smooth the emotion function to make it more clear.</font></h4>
++ <h4>Collect more data for other formal speeches to gain more convincing analysis.<h4>
++ <h4>Smooth the emotion function to make it more clear.<4>
 
 
