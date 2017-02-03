@@ -362,9 +362,7 @@ p + geom_boxplot()
 
 <h4><font face="Times New Roman">Finding 1:first singular form always come with trust and anticipation. </font></h4>
 
-+ George Washington
-
-<p>There are 4 sentences in his speeches,with 1,2 and 4 using high frequency of first person singular pronoun,and the emotions of these sentences are mainly trust.</p>
++ George Washington: There are 4 sentences in his speeches,with 1,2 and 4 using high frequency of first person singular pronoun,and the emotions of these sentences are mainly trust.
 ```{r,warning=F}
 senten_mat2<-melt(senten_mat(2))
 sen_dat<-data.frame(sentence.number=senten_mat2$Var1,times=senten_mat2$value,personal_pronoun=senten_mat2$Var2,2)
@@ -389,9 +387,7 @@ eArea(senti_mat)
 #eWordcloud(dat, namevar = ~word, datavar = ~freq,size = c(600, 600),title = "George Washington & fist person singular",rotationRange = c(-1, 1))
 ```
 
-+ William McKinley
-
-<p>The sentences using first person singular pronoun frequently also contains trust emotion. </p>
++ William McKinley: The sentences using first person singular pronoun frequently also contains trust emotion.
 ```{r}
 senten_mat2<-melt(senten_mat(28))
 sen_dat<-data.frame(sentence.number=senten_mat2$Var1,times=senten_mat2$value,personal_pronoun=senten_mat2$Var2,2)
