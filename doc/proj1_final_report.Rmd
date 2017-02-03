@@ -574,6 +574,6 @@ apply(senti_mat5,2,mean,na.rm=T)
 <h3><font face="Times New Roman">Part 6 - Next step</font></h3>
 
 + <h4>Collect more data for other formal speeches to gain more convincing analysis.<h4>
-+ <h4>Smooth the emotion function to make it more clear.<4>
++ <h4>Smooth the emotion function to make it more clear.<h4>
 
 
