@@ -1,5 +1,4 @@
 ---
-#title: "Project 1"
 output:
   html_notebook: default
   html_document: default
@@ -11,6 +10,9 @@ output:
 <h4 class="date"><em><font face="Times New Roman">February 3rd. 2017</font></em></h4>
 </div>
 <div style="text-align:center">![image](../figs/personalpro.jpeg)</div>
+
+<h3><font face="Times New Roman">Part 0 - Topic introduction</font></h3>
+<p>People always use a lot of personal pronouns to avoid repeating someone’s names time and time again. Different people may use different personal pronouns for different weight in different situation to demonstrate different meanings and emotions. What about the situations in presidents' Inaugural Speeches?</p>
 
 
 <h3><font face="Times New Roman">Part 1 - Packages preparaion</font></h3>
@@ -52,6 +54,8 @@ source("../lib/customized_function.R")
 
 <h3><font face="Times New Roman">Part 2 - Data cleaning</font></h3>
 
+<p>We count the word frequency for each speeches and make this data matrix on which our whole analysis would based.</p>
+
 ```{r,warning=F}
 inaug.list=read.csv("../data/InaugurationInfo.csv", stringsAsFactors = FALSE)
 inaug.data=read.table("../data/InauguationDates.txt", stringsAsFactors = FALSE,blank.lines.skip=F,sep= "\t")
@@ -89,6 +93,8 @@ head(matsort)
 ```
 
 <h3><font face="Times New Roman">Part 3 - Different president uses personal pronoun for different weight</font></h3>
+
+<p>We divide personal pronouns into 4 types,first person singular form,first person plural form,second person form and third person form.</p>
 
 <div style="text-align:center">![image](../figs/personaltype.jpeg)</div>
 
@@ -134,16 +140,24 @@ c<-ggplot(pp_dat,aes(president,proportion,fill=personal_pronoun))+geom_bar(stat=
 #grid.arrange(b,c,nrow=2)
 ```
 
-<h4><font face="Times New Roman">General Trend</font></h4>
+<p>Notice:The plot(and some following plots) are interactive by moving your mouse to a certain data point,details can be shown.</p>
 
-<p>In general,there is ....</p>
+<h4>3.1 General Trend</h4>
+
 ```{r}
 eArea(pp_mat1)
 ```
+<p>In general</p>
++ There is no obvious trend,just some fluctuations for second & third person using weight.
++ There is a slightly decreasing for first person singular form using weight.
++ There is a slightly increasing for first person plural form using weight.
 
-<h4><font face="Times New Roman">Comparing between different terms</font></h4>
+<p>It's quite reasonable,since presidents come to realize that they should emphasize people's rights and responsibilities to let people feel that they are being together,the interests of every citizens are closely related to destiny of the United States,rather than just talking about themselves.</p>
 
-<p>In general,there is ....</p>
+
+<h4>3.2 Comparing between different terms</h4>
+
+
 ```{r,warning=F}
 #different term 
 avg<-apply(pp_mat,2,mean)
@@ -159,10 +173,12 @@ ggplot(mydat,aes(term,proportion,fill=personal_pronoun))+geom_bar(stat="identity
   scale_fill_brewer(palette = "Blues")
 eRadar(xtabs( proportion~ term+personal_pronoun, mydat))
 ```
+<p>From president's term 1 to term 2,they tend to use more first person plural form than first person singular form.It's also reasonable, since the president and the public become familiar to each other,so the president naturally take himself and the public as a whole group.</p>
 
-<h4><font face="Times New Roman">Comparing among different terms</font></h4>
 
-<p>In general,there is ....</p>
+<h4>3.3 Comparing among different parties</h4>
+
+
 ```{r,warning=F}
 #different party
 new_inaug.list<-cbind(inaug.list,pp_mat)
@@ -181,8 +197,10 @@ ggplot(mydat,aes(party,proportion,fill=personal_pronoun))+geom_bar(stat="identit
   scale_fill_brewer(palette = "Blues")+ theme(axis.text.x = element_text(angle = 15, hjust = 0.5, vjust = 0.5))
 eRadar(xtabs( proportion~ party+personal_pronoun, mydat))
 ```
+<p>As the plot shown,Whig used first person singular form and third person most frequently,used first person plural form as well as second person at least frequency.While federalist is almost the opposite.</p>
 
-<h3><font face="Times New Roman">Part 4 - Analysis focusing on each kind of personal pronoun's "Crazy Fan"</font></h3>
+
+<h3><font face="Times New Roman">Part 4 - Analysis on each kind of personal pronoun's CRAZY FAN</font></h3>
 ```{r,warning=F}
 data1<-pp_mat[order(pp_mat[,1],decreasing = T),][1:10,]
 data2<-pp_mat[order(pp_mat[,2],decreasing = T),][1:10,]
@@ -196,14 +214,84 @@ new1<-data.frame(type=new1[,"type"],name=new1[,"name"],proportion=as.numeric(new
 new2<-data.frame(type=new2[,"type"],name=new2[,"name"],proportion=as.numeric(new2[,"prop"]))
 new3<-data.frame(type=new3[,"type"],name=new3[,"name"],proportion=as.numeric(new3[,"prop"]))
 new4<-data.frame(type=new4[,"type"],name=new4[,"name"],proportion=as.numeric(new4[,"prop"]))
+inaug.list=read.csv("../data/InaugurationInfo.csv", stringsAsFactors = FALSE)
+inaug.data=read.table("../data/InauguationDates.txt", stringsAsFactors = FALSE,blank.lines.skip=F,sep= "\t")
+first1<-c("I","me","mine","my")
+first2<-c("we","our","ours","us")
+second<-c("you","your","yours")
+third<-c("he","she","it","him","her","his","hers","they","them","their")
+personal<-list(first1,first2,second,third)
+speech.list=read.csv("../data/InaugurationInfo.csv", stringsAsFactors = FALSE)
+speech.list$type=c(rep("inaug", nrow(speech.list)))
+speech.list$fulltext=NA
+sentence.list=NULL
+```
 
+
+<h4>4.1 Top ten using first person singular form</h4>
+
+```{r}
 eBar(new1, ~name, ~proportion, ~type)
+```
+
+```{r}
+test<-topic_wc(2,1)
+dat<-data.frame(word=test[,"word"],freq=5*as.numeric(test[,"n"]))
+#par(mfrow=c(1,2))
+eWordcloud(dat[7:65,], namevar = ~word, datavar = ~freq,size = c(600, 600),title = "George Washington & first person singular",rotationRange = c(-1, 1))
+test<-topic_wc(2,3)
+dat<-data.frame(word=test[,"word"],freq=5*as.numeric(test[,"n"]))
+eWordcloud(dat[2:32,], namevar = ~word, datavar = ~freq,size = c(600, 600),title = "George Washington & second person",rotationRange = c(-1, 1))
+```
+<p>No.1 "first person singular user" is George Washington(term 2).The 67% personal pronoun George Washington used in his second person is first person singular form. He also used second person quite frequently at about 33%.Therefore,we can speculate in his speeches,he set he and the listeners apart,taking himself as a leader talking something like "administration","chief", while using second term to express his anticipation to public.</p>
+
+```{r}
+test<-matsort[matsort[,"name"] == "WilliamMcKinley 1",]
+test1<-matsort[matsort[,"name"] == "WoodrowWilson 2",]
+test2<-matsort[matsort[,"name"] == "JamesBuchanan 1",]
+test<-rbind(test,test1,test2)
+test<-test[order(as.numeric(test[,3]),decreasing = T),]
+test<-test[17:2529,]
+dat<-data.frame(word=test[,"word"],freq=test[,"n"])
+#par(mfrow=c(1,2))
+eWordcloud(dat, namevar = ~word, datavar = ~freq,size = c(600, 600),title = "WilliamMcKinley 1 & WoodrowWilson 2 & JamesBuchanan 1",rotationRange = c(-1, 1))
+```
+<p>Except Washington,from No.2 William McKinley(term 1) to No.4 James Buchanan(term 1),they didn't even use second person.Add their three's speeches to make the wordcloud,we can hardly find the words demonstrating centralization of power, instead,there are words like "congress","fair","civil","life",showing more gentle emotion.</p>
+<h4>4.2 Top ten using first person plural form</h4>
+
+```{r}
 eBar(new2, ~name, ~proportion, ~type)
+```
+
+
+```{r}
+test<-matsort[matsort[,"name"] == "FranklinDRoosevelt 3",]
+test1<-matsort[matsort[,"name"] == "TheodoreRoosevelt 1",]
+test2<-matsort[matsort[,"name"] == "AndrewJackson 1",]
+test3<-matsort[matsort[,"name"] == "AbrahamLincoln 2",]
+test4<-matsort[matsort[,"name"] == "WilliamMcKinley 2",]
+test5<-matsort[matsort[,"name"] == "FranklinDRoosevelt 4",]
+test<-rbind(test,test1,test2,test3,test4,test5)
+test<-test[order(as.numeric(test[,3]),decreasing = T),]
+test<-test[40:2638,]
+dat<-data.frame(word=test[,"word"],freq=test[,"n"])
+#par(mfrow=c(1,2))
+eWordcloud(dat, namevar = ~word, datavar = ~freq,size = c(600, 600),title = "TOP 6 using first person plural form",rotationRange = c(-1, 1))
+```
+
+<p>For presidents frequently using first person plural form, there exists similar phenomenon.From No.1 Franklin DRoosevelt(term 3) to No.6 Franklin DRoosevelt(term 4),they also make the speeches without using second person.Add their speeches to make the wordcloud,we find similar words showing gentle emotion.</p>
+
+<h4>4.3 Top ten using second person</h4>
+```{r}
 eBar(new3, ~name, ~proportion, ~type)
+```
+<h4>4.4 Top ten using third person</h4>
+```{r}
 eBar(new4, ~name, ~proportion, ~type)
 ```
 
-<h4><font face="Times New Roman">Each personal pronoun's "Fan Club" feature : positive? negative? </font></h4>
+<h4>4.5 Each personal pronoun's "Fan Club" feature : positive? negative? </h4>
+
 ```{r,warning=F}
 data(positive.words)
 data(negative.words)
@@ -244,10 +332,11 @@ colnames(senti_mat2)<-c("sentimental_scores","personal_pron")
 dat<-data.frame(senti_mat2)
 p <- ggplot(dat, aes(personal_pron, as.numeric(sentimental_scores)))
 p + geom_boxplot()
-
 ```
 
-<h4><font face="Times New Roman">Each personal pronoun's "Fan Club" feature : average of word using times? </font></h4>
+<p>According to the plot, First person plural's "Fan Club" tend to be more negative,while the third person form's "Fan Club" seem to be more positive. But there is no obvious differences.</p>
+
+<h4>4.6 Each personal pronoun's "Fan Club" feature : average of word using times? </h4>
 ```{r,warning=F}
 #avg time vs person
 avg_mat<-matrix(nrow = nrow(inaug.list),ncol = 2)
@@ -265,25 +354,13 @@ dat<-data.frame(senti_mat3)
 p <- ggplot(dat, aes(personal_pron, as.numeric(word_avg_time)))
 p + geom_boxplot()
 ```
+<p>According to the plot, First person plural's "Fan Club" tend to use the same words for less times,the median is about 12 times;while the third person form's "Fan Club" using the same words for more times,the median is about 27 times. </p>
 
+<h3><font face="Times New Roman">Part 5 - What are they talking/feeling using personal pronoun ? </font></h3>
 
-<h3><font face="Times New Roman">Part5 -What are they talkingfeeling using personal pronoun ? </font></h3>
+<h4><font face="Times New Roman">Finding 1:first singular form always come with trust and anticipation. </font></h4>
 
-```{r,warning=F}
-inaug.list=read.csv("../data/InaugurationInfo.csv", stringsAsFactors = FALSE)
-inaug.data=read.table("../data/InauguationDates.txt", stringsAsFactors = FALSE,blank.lines.skip=F,sep= "\t")
-first1<-c("I","me","mine","my")
-first2<-c("we","our","ours","us")
-second<-c("you","your","yours")
-third<-c("he","she","it","him","her","his","hers","they","them","their")
-personal<-list(first1,first2,second,third)
-speech.list=read.csv("../data/InaugurationInfo.csv", stringsAsFactors = FALSE)
-speech.list$type=c(rep("inaug", nrow(speech.list)))
-speech.list$fulltext=NA
-sentence.list=NULL
-```
-
-Analysis case 1: first1 & second crazy fan
++ George Washington
 ```{r,warning=F}
 senten_mat2<-melt(senten_mat(2))
 sen_dat<-data.frame(sentence.number=senten_mat2$Var1,times=senten_mat2$value,personal_pronoun=senten_mat2$Var2,2)
@@ -302,10 +379,13 @@ a1<-ggplot(sen_dat,aes(sentence.number,times,fill=personal_pronoun))+geom_bar(st
 a1
 eArea(senti_mat)
 #find topics
-test<-topic_wc(2,1)[1:60,]
-dat<-data.frame(word=test[,"word"],freq=test[,"n"])
-eWordcloud(dat, namevar = ~word, datavar = ~freq)
+#test<-topic_wc(2,1)
+#test<-test[7:65,]
+#dat<-data.frame(word=test[,"word"],freq=test[,"n"])
+#eWordcloud(dat, namevar = ~word, datavar = ~freq,size = c(600, 600),title = "George Washington & fist person singular",rotationRange = c(-1, 1))
 ```
+
++ William McKinley
 
 ```{r}
 senten_mat2<-melt(senten_mat(28))
@@ -325,29 +405,27 @@ a1<-ggplot(sen_dat,aes(sentence.number,times,fill=personal_pronoun))+geom_bar(st
 a1
 eArea(senti_mat)
 
-find_sen(28,134)
-find_sen(28,135)
-find_sen(28,136)
-find_sen(28,137)
-apply(senti_mat,2,mean)
-test<-topic_wc(28,1)[1:60,]
-dat<-data.frame(word=test[,"word"],freq=test[,"n"])
-eWordcloud(dat, namevar = ~word, datavar = ~freq) 
+#find_sen(28,134)
+#find_sen(28,135)
+#find_sen(28,136)
+#find_sen(28,137)
+#test<-topic_wc(28,1)[1:60,]
+#test<-test[6:60,]
+#dat<-data.frame(word=test[,"word"],freq=test[,"n"])
+#eWordcloud(dat, namevar = ~word, datavar = ~freq,size = c(600, 600),title = "WilliamMcKinley & fist person singular",rotationRange = c(-1, 1))
 ```
+<h4><font face="Times New Roman">Finding 2 :first plural form always convey positive emotions.</font></h4>
 
-
-
-
-Analysis case 2: first2 crazy fan
++ Richard Nixon
 ```{r,warning=F}
-senten_mat2<-melt(senten_mat(39))
+senten_mat2<-melt(senten_mat(45))
 sen_dat<-data.frame(sentence.number=senten_mat2$Var1,times=senten_mat2$value,personal_pronoun=senten_mat2$Var2)
 
 par(mfrow=c(4,1), mar=c(1,0,2,0), bty="n", xaxt="n", yaxt="n", font.main=1)
 a2<-ggplot(sen_dat,aes(sentence.number,times,fill=personal_pronoun))+geom_bar(stat="identity",position="stack")+ggtitle("")+guides(fill=guide_legend(title=NULL))+
   scale_fill_brewer(palette = "Blues")+ xlab("")
 
-senti_mat3<-round(count_emo(39)[,c(1,2,4,5,7,8)],2)
+senti_mat3<-round(count_emo(45)[,c(1,2,4,5,7,8)],2)
 rownames(senti_mat3)<-seq(1,nrow(senti_mat3))
 senti_mat4<-melt(senti_mat3)
 senti_dat2<-data.frame(sentence_number=senti_mat4$Var1,score=senti_mat4$value,sentiment=senti_mat4$Var2)
@@ -355,16 +433,19 @@ senti_dat2<-data.frame(sentence_number=senti_mat4$Var1,score=senti_mat4$value,se
 #  geom_area() 
 #b2<-ggplot(senti_dat2,aes(x = sentence_number, y = score, fill = sentiment))+geom_bar(stat="identity",position="stack")+ggtitle("")+guides(fill=guide_legend(title=NULL))
 a2
+apply(senti_mat3,2,mean)
 eArea(senti_mat3)
-test<-topic_wc(39,2)[1:60,]
-dat<-data.frame(word=test[,"word"],freq=test[,"n"])
-eWordcloud(dat, namevar = ~word, datavar = ~freq)
+#test<-topic_wc(45,2)[1:60,]
+#dat<-data.frame(word=test[,"word"],freq=test[,"n"])
+#eWordcloud(dat, namevar = ~word, datavar = ~freq)
 ```
 
++ Barack Obama
+
 ```{r}
-senten_mat2<-melt(senten_mat(35))
+senten_mat2<-melt(senten_mat(57))
 sen_dat<-data.frame(sentence.number=senten_mat2$Var1,times=senten_mat2$value,personal_pronoun=senten_mat2$Var2,2)
-senti_mat<-round(count_emo(35)[,c(1,2,4,5,7,8)],2)
+senti_mat<-round(count_emo(57)[,c(1,2,4,5,7,8)],2)
 rownames(senti_mat)<-seq(1,nrow(senti_mat))
 senti_mat2<-melt(senti_mat)
 senti_dat<-data.frame(sentence_number=senti_mat2$Var1,score=senti_mat2$value,sentiment=senti_mat2$Var2)
@@ -383,21 +464,19 @@ eArea(senti_mat)
 #find_sen(28,136)
 #find_sen(28,137)
 apply(senti_mat,2,mean)
-test<-topic_wc(35,2)[1:60,]
-dat<-data.frame(word=test[,"word"],freq=test[,"n"])
-eWordcloud(dat, namevar = ~word, datavar = ~freq)
+#test<-topic_wc(35,2)[1:60,]
+#dat<-data.frame(word=test[,"word"],freq=test[,"n"])
+#eWordcloud(dat, namevar = ~word, datavar = ~freq)
 ```
 
+<h4><font face="Times New Roman">Finding 3 : Anger often begin with third person form.</font></h4>
 
-
-
-Analysis case 3: third crazy fan
-
++ Ulysses SGrant
 ```{r}
-senten_mat2<-melt(senten_mat(57))
+senten_mat2<-melt(senten_mat(21))
 sen_dat<-data.frame(sentence.number=senten_mat2$Var1,times=senten_mat2$value,personal_pronoun=senten_mat2$Var2)
 a3<-ggplot(sen_dat,aes(sentence.number,times,fill=personal_pronoun))+geom_bar(stat="identity",position="stack")+ggtitle("")+guides(fill=guide_legend(title=NULL))+ scale_fill_brewer(palette = "Blues")+ xlab("")
-senti_mat5<-round(count_emo(57)[,c(1,2,4,5,7,8)],2)
+senti_mat5<-round(count_emo(21)[,c(1,2,4,5,7,8)],2)
 rownames(senti_mat5)<-seq(1,nrow(senti_mat5))
 senti_mat6<-melt(senti_mat5)
 senti_dat3<-data.frame(sentence_number=senti_mat6$Var1,score=senti_mat6$value,sentiment=senti_mat6$Var2)
@@ -407,13 +486,34 @@ b3<-ggplot(senti_dat3,aes(x = sentence_number, y = score, fill = sentiment))+geo
 a3
 eArea(senti_mat5)
 apply(senti_mat5,2,mean,na.rm=T)
-test<-topic_wc(57,2)[1:60,]
-dat<-data.frame(word=test[,"word"],freq=test[,"n"])
-eWordcloud(dat, namevar = ~word, datavar = ~freq)
+#test<-topic_wc(57,2)[1:60,]
+#dat<-data.frame(word=test[,"word"],freq=test[,"n"])
+#eWordcloud(dat, namevar = ~word, datavar = ~freq)
 ```
 
++ Dwight DEisenhower
+```{r}
+senten_mat2<-melt(senten_mat(43))
+sen_dat<-data.frame(sentence.number=senten_mat2$Var1,times=senten_mat2$value,personal_pronoun=senten_mat2$Var2)
+a3<-ggplot(sen_dat,aes(sentence.number,times,fill=personal_pronoun))+geom_bar(stat="identity",position="stack")+ggtitle("")+guides(fill=guide_legend(title=NULL))+ scale_fill_brewer(palette = "Blues")+ xlab("")
+senti_mat5<-round(count_emo(43)[,c(1,2,4,5,7,8)],2)
+rownames(senti_mat5)<-seq(1,nrow(senti_mat5))
+senti_mat6<-melt(senti_mat5)
+senti_dat3<-data.frame(sentence_number=senti_mat6$Var1,score=senti_mat6$value,sentiment=senti_mat6$Var2)
+b3<-ggplot(senti_dat3,aes(x = sentence_number, y = score, fill = sentiment))+geom_bar(stat="identity",position="stack")+ggtitle("")+guides(fill=guide_legend(title=NULL))
+#b3<-ggplot(senti_dat3, aes(x = sentence_number, y = score, fill = sentiment)) +
+#  geom_area() 
+a3
+eArea(senti_mat5)
+apply(senti_mat5,2,mean,na.rm=T)
+#test<-topic_wc(57,2)[1:60,]
+#dat<-data.frame(word=test[,"word"],freq=test[,"n"])
+#eWordcloud(dat, namevar = ~word, datavar = ~freq)
+```
 
+<h3><font face="Times New Roman">Part 6 - Next step</font></h3>
 
-
++ <h4><font face="Times New Roman">Collect more data for other formal speeches to gain more convincing analysis.</font></h4>
++ <h4><font face="Times New Roman">Smooth the emotion function to make it more clear.</font></h4>
 
 
