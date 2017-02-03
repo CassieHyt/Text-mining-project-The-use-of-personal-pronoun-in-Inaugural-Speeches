@@ -452,6 +452,9 @@ eArea(senti_mat)
 ```
 <h4><font face="Times New Roman">Finding 2 :first plural form always convey positive emotions.</font></h4>
 
+<p>In the following two examples,there is light blue showing use of first person plural form in the first plot,and in the second plot,when we exclude negative emotions we can see the positive fluctuation pattern is one-to-one corresponded with the light blue in plot 1,which suggests first plural form always convey positive emotions.</p>
+
+
 + Richard Nixon
 
 ```{r,warning=F}
@@ -517,6 +520,8 @@ apply(senti_mat,2,mean)
 ```
 
 <h4><font face="Times New Roman">Finding 3 : Anger often begin with third person form.</font></h4>
+
+<p>The third is about anger which is a kind of rare emotion in presidents speech.But once it appear the red part showing anger,the coresponding part is dark blue ,that is sentence with third form.We can see this situation in the following two examples.</p>
 
 + Ulysses S.Grant
 
